@@ -36,7 +36,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text("✅ Account Created Successfully!"),
+        content: Text(" Account Created Successfully!"),
         backgroundColor: Colors.green,
       ),
     );
@@ -60,7 +60,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           children: [
             const SizedBox(height: 60),
 
-            // ---------- HEADER ----------
+            
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Row(
@@ -91,7 +91,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
             const SizedBox(height: 40),
 
-            // ---------- SIGNUP SECTION ----------
+            
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 25),
               child: LayoutBuilder(

@@ -28,8 +28,7 @@ class MyApp extends StatelessWidget {
 }
 
 class Wrapper extends StatefulWidget {
-  /// Which tab to show first:
-  /// 0 = Home, 1 = Products, 2 = Contact Us, 3 = About Us
+ 
   const Wrapper({super.key, this.initialIndex = 0});
 
   final int initialIndex;
@@ -46,7 +45,7 @@ class _WrapperState extends State<Wrapper> {
   @override
   void initState() {
     super.initState();
-    selectedItem = widget.initialIndex; // <-- use initial index
+    selectedItem = widget.initialIndex; 
     screens = const [
       Homescreen(),
       ProductsPage(),

@@ -43,7 +43,7 @@ class ProductDetailPage extends StatelessWidget {
         builder: (context, constraints) {
           final isDesktop = constraints.maxWidth >= 1000;
 
-          // Wrap desktop in a centered max-width container
+          
           Widget bounded(Widget child) => Center(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 1200),
@@ -55,12 +55,12 @@ class ProductDetailPage extends StatelessWidget {
               );
 
           if (!isDesktop) {
-            // ------------------- MOBILE / TABLET (original stacked layout) -------------------
+            
             return SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // PRODUCT IMAGE
+                
                   Hero(
                     tag: image,
                     child: ClipRRect(
@@ -75,7 +75,7 @@ class ProductDetailPage extends StatelessWidget {
 
                   const SizedBox(height: 25),
 
-                  // PRODUCT INFO
+                  
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: Text(
@@ -116,7 +116,7 @@ class ProductDetailPage extends StatelessWidget {
 
                   const SizedBox(height: 40),
 
-                  // ADD TO CART BUTTON
+                  
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: ElevatedButton(
@@ -161,12 +161,12 @@ class ProductDetailPage extends StatelessWidget {
             );
           }
 
-          // ------------------- DESKTOP (side-by-side layout) -------------------
+          
           return bounded(
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // LEFT: LARGE PRODUCT IMAGE
+                
                 Expanded(
                   flex: 6,
                   child: Card(
@@ -176,7 +176,7 @@ class ProductDetailPage extends StatelessWidget {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
                     clipBehavior: Clip.antiAlias,
                     child: AspectRatio(
-                      aspectRatio: 1, // square-ish display for jewelry photos
+                      aspectRatio: 1, 
                       child: Hero(
                         tag: image,
                         child: Image.asset(
@@ -189,7 +189,7 @@ class ProductDetailPage extends StatelessWidget {
                 ),
                 const SizedBox(width: 24),
 
-                // RIGHT: DETAILS PANEL
+                
                 Expanded(
                   flex: 6,
                   child: Container(
@@ -211,7 +211,7 @@ class ProductDetailPage extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // NAME
+                        
                         Text(
                           name,
                           style: TextStyle(
@@ -224,7 +224,7 @@ class ProductDetailPage extends StatelessWidget {
                         ),
                         const SizedBox(height: 10),
 
-                        // PRICE
+                       
                         Text(
                           price,
                           style: TextStyle(
@@ -235,7 +235,7 @@ class ProductDetailPage extends StatelessWidget {
                         ),
                         const SizedBox(height: 20),
 
-                        // DIVIDER
+                       
                         Divider(
                           color: colorScheme.onSurface.withOpacity(0.12),
                           height: 1,
@@ -243,7 +243,7 @@ class ProductDetailPage extends StatelessWidget {
                         ),
                         const SizedBox(height: 20),
 
-                        // DESCRIPTION
+                        
                         Text(
                           description,
                           style: TextStyle(
@@ -256,7 +256,7 @@ class ProductDetailPage extends StatelessWidget {
 
                         const SizedBox(height: 28),
 
-                        // BUTTON
+                       
                         SizedBox(
                           width: 280,
                           height: 48,

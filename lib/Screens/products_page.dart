@@ -112,12 +112,12 @@ class ProductsPage extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  // Responsive columns: 2 (phone), 3 (tablet), 4 (desktop)
+                  
                   final double w = constraints.maxWidth;
                   final int crossAxisCount =
                       w >= 1100 ? 4 : (w >= 700 ? 3 : 2);
 
-                  // Slightly different aspect ratios per breakpoint to avoid overflow
+                  
                   final double childAspectRatio =
                       w >= 1100 ? 0.88 : (w >= 700 ? 0.78 : 0.62);
 
@@ -171,20 +171,20 @@ class ProductsPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Uniform, slightly shorter header image to free space for text+button
+          
           AspectRatio(
-            aspectRatio: 1.5, // width / height (higher = shorter image)
+            aspectRatio: 1.5, 
             child: Image.asset(image, fit: BoxFit.cover),
           ),
 
-          // Content area grows; button anchored at the bottom
+          
           Expanded(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // Name: allow up to 2 lines, then ellipsis
+                  
                   Text(
                     name,
                     textAlign: TextAlign.center,

@@ -23,13 +23,13 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Column(
           children: [
             const SizedBox(height: 60),
-            // ---------- HEADER ----------
+           
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 25),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Proper Back Button
+                  
                   IconButton(
                     icon: Icon(Icons.arrow_back_ios_new, color: colorScheme.onSurface),
                     onPressed: () {
@@ -61,7 +61,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
             const SizedBox(height: 40),
-            // ---------- LOGIN SECTION ----------
+            
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 25),
               child: LayoutBuilder(
@@ -71,10 +71,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Left login card
+                        
                         Expanded(child: loginCard(context, colorScheme)),
                         const SizedBox(width: 25),
-                        // Right info card
+                        
                         Expanded(child: infoCard(colorScheme)),
                       ],
                     );
@@ -191,7 +191,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 shadowColor: colorScheme.primary.withOpacity(0.4),
               ),
               onPressed: () {
-                // Navigate to Wrapper after login
+               
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => const Wrapper()),

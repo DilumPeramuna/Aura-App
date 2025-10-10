@@ -74,12 +74,12 @@ class AboutUsScreen extends StatelessWidget {
 
             const SizedBox(height: 40),
 
-            // ---------- RESPONSIVE BODY ----------
+            
             LayoutBuilder(
               builder: (context, constraints) {
                 final isDesktop = constraints.maxWidth >= 1000;
 
-                // Helper to center and clamp width on desktop
+                
                 Widget bounded(Widget child) => Center(
                       child: ConstrainedBox(
                         constraints: const BoxConstraints(maxWidth: 1200),
@@ -91,7 +91,7 @@ class AboutUsScreen extends StatelessWidget {
                     );
 
                 if (!isDesktop) {
-                  // ---------- MOBILE/TABLET: original stacked layout ----------
+                  
                   return Column(
                     children: [
                       // HOW IT STARTED
@@ -135,7 +135,7 @@ class AboutUsScreen extends StatelessWidget {
 
                       const SizedBox(height: 50),
 
-                      // CRAFTED TO LAST
+                      
                       bounded(
                         Column(
                           children: [
@@ -153,13 +153,13 @@ class AboutUsScreen extends StatelessWidget {
 
                       const SizedBox(height: 50),
 
-                      // VALUES  (FIXED for mobile overflow)
+                      
                       Container(
                         color: colorScheme.surface.withOpacity(0.05),
                         padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 25),
                         child: LayoutBuilder(
                           builder: (context, c) {
-                            // 1 column on narrow phones, 2 on wider phones/tablets
+                            
                             final spacing = 15.0;
                             final columns = c.maxWidth >= 520 ? 2 : 1;
                             final cardWidth =
@@ -242,10 +242,10 @@ class AboutUsScreen extends StatelessWidget {
                   );
                 }
 
-                // ---------- DESKTOP: airy two-column layout with alternating image/text ----------
+                
                 return Column(
                   children: [
-                    // HOW IT STARTED (Text left, Image right)
+                    
                     bounded(
                       _DesktopSectionRow(
                         colorScheme: colorScheme,
@@ -271,7 +271,7 @@ class AboutUsScreen extends StatelessWidget {
 
                     const SizedBox(height: 40),
 
-                    // ETHICAL SOURCING (Image left, Text right)
+                    
                     bounded(
                       _DesktopSectionRow(
                         colorScheme: colorScheme,
@@ -293,7 +293,7 @@ class AboutUsScreen extends StatelessWidget {
 
                     const SizedBox(height: 40),
 
-                    // CRAFTED TO LAST (Text left, Image right)
+                    
                     bounded(
                       _DesktopSectionRow(
                         colorScheme: colorScheme,
@@ -413,7 +413,7 @@ class AboutUsScreen extends StatelessWidget {
     );
   }
 
-  // ---------- SECTION TITLE ----------
+  
   static Widget sectionTitle(String title, ColorScheme colorScheme) {
     return Text(
       title,
@@ -427,7 +427,7 @@ class AboutUsScreen extends StatelessWidget {
     );
   }
 
-  // ---------- SECTION TEXT ----------
+  
   static Widget sectionText(String text, ColorScheme colorScheme) {
     return Text(
       text,
@@ -440,7 +440,7 @@ class AboutUsScreen extends StatelessWidget {
     );
   }
 
-  // ---------- QUOTE ----------
+ 
   static Widget quoteText(String quote, ColorScheme colorScheme) {
     return Container(
       decoration: BoxDecoration(
@@ -464,7 +464,7 @@ class AboutUsScreen extends StatelessWidget {
     );
   }
 
-  // ---------- ROUNDED IMAGE ----------
+  
   static Widget roundedImage(String path) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(15),
@@ -485,7 +485,7 @@ class AboutUsScreen extends StatelessWidget {
     );
   }
 
-  // ---------- VALUE CARD ----------
+
   static Widget valueCard(String title, String subtitle, ColorScheme colorScheme) {
     return Container(
       padding: const EdgeInsets.all(18),
@@ -529,7 +529,7 @@ class AboutUsScreen extends StatelessWidget {
   }
 }
 
-// ---------- DESKTOP SECTION ROW (helper) ----------
+
 class _DesktopSectionRow extends StatelessWidget {
   final Widget left;
   final Widget right;

@@ -13,7 +13,7 @@ class ContactUsScreen extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // ---------- HERO SECTION ----------
+            
             Stack(
               children: [
                 Container(
@@ -67,12 +67,12 @@ class ContactUsScreen extends StatelessWidget {
 
             const SizedBox(height: 40),
 
-            // ---------- RESPONSIVE CONTENT AREA ----------
+            
             LayoutBuilder(
               builder: (context, constraints) {
                 final isDesktop = constraints.maxWidth >= 1000;
 
-                // A centered container to avoid content getting too wide on desktop
+                
                 Widget constrained(Widget child) => Center(
                       child: ConstrainedBox(
                         constraints: const BoxConstraints(maxWidth: 1200),
@@ -81,10 +81,10 @@ class ContactUsScreen extends StatelessWidget {
                     );
 
                 if (!isDesktop) {
-                  // ---------- MOBILE/TABLET (stacked) ----------
+
                   return Column(
                     children: [
-                      // ---------- CONTACT FORM ----------
+                    
                       constrained(
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 25),
@@ -178,7 +178,7 @@ class ContactUsScreen extends StatelessWidget {
 
                       const SizedBox(height: 50),
 
-                      // ---------- CONTACT INFO ----------
+                   
                       constrained(
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 30),
@@ -229,7 +229,7 @@ class ContactUsScreen extends StatelessWidget {
 
                       const SizedBox(height: 40),
 
-                      // ---------- FOLLOW US ----------
+                      
                       constrained(
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 25),
@@ -266,7 +266,7 @@ class ContactUsScreen extends StatelessWidget {
 
                       const SizedBox(height: 50),
 
-                      // ---------- MAP ----------
+                    
                       constrained(
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 25),
@@ -293,7 +293,7 @@ class ContactUsScreen extends StatelessWidget {
                   );
                 }
 
-                // ---------- DESKTOP (two-column) ----------
+              
                 return constrained(
                   Padding(
                     padding:
@@ -301,7 +301,7 @@ class ContactUsScreen extends StatelessWidget {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Left column: form
+                       
                         Expanded(
                           flex: 7,
                           child: Container(
@@ -331,7 +331,7 @@ class ContactUsScreen extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 20),
 
-                                // Grid-like form layout on desktop
+                             
                                 Row(
                                   children: [
                                     Expanded(
@@ -425,7 +425,7 @@ class ContactUsScreen extends StatelessWidget {
 
                         const SizedBox(width: 24),
 
-                        // Right column: info + socials + map
+                      
                         Expanded(
                           flex: 5,
                           child: Column(
@@ -533,7 +533,7 @@ class ContactUsScreen extends StatelessWidget {
               },
             ),
 
-            // ---------- FOOTER ----------
+          
             const SizedBox(height: 60),
             const FooterWidget(),
           ],
@@ -542,7 +542,7 @@ class ContactUsScreen extends StatelessWidget {
     );
   }
 
-  // ---------- FORM FIELD BUILDER ----------
+ 
   static Widget _buildTextField({
     required String label,
     required IconData icon,
@@ -578,7 +578,7 @@ class ContactUsScreen extends StatelessWidget {
     );
   }
 
-  // ---------- INFO TILE ----------
+
   static Widget infoTile(
       IconData icon, String title, String subtitle, ColorScheme colorScheme) {
     return Row(
@@ -614,7 +614,7 @@ class ContactUsScreen extends StatelessWidget {
     );
   }
 
-  // ---------- SOCIAL ICON ----------
+  
   static Widget socialIcon(IconData icon, ColorScheme colorScheme) {
     return Container(
       padding: const EdgeInsets.all(10),
@@ -633,7 +633,7 @@ class ContactUsScreen extends StatelessWidget {
     );
   }
 
-  // ---------- MAP PREVIEW ----------
+  
   Widget _mapPreview(ColorScheme colorScheme) {
     return Container(
       height: 220,

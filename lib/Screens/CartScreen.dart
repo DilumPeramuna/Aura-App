@@ -74,7 +74,7 @@ class _CartScreenState extends State<CartScreen> {
             )
           : Column(
               children: [
-                // Boutique header strip
+                
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.fromLTRB(18, 16, 18, 12),
@@ -136,7 +136,7 @@ class _CartScreenState extends State<CartScreen> {
                         ),
                         child: Row(
                           children: [
-                            // Product image
+                            
                             ClipRRect(
                               borderRadius: const BorderRadius.only(
                                 topLeft: Radius.circular(16),
@@ -150,7 +150,7 @@ class _CartScreenState extends State<CartScreen> {
                               ),
                             ),
 
-                            // Details
+                            
                             Expanded(
                               child: Padding(
                                 padding:
@@ -188,7 +188,7 @@ class _CartScreenState extends State<CartScreen> {
                                       ],
                                     ),
                                     const SizedBox(height: 8),
-                                    // Fine divider
+                                   
                                     Container(
                                       height: 1,
                                       decoration: BoxDecoration(
@@ -221,7 +221,7 @@ class _CartScreenState extends State<CartScreen> {
                               ),
                             ),
 
-                            // Remove button
+                            
                             Padding(
                               padding:
                                   const EdgeInsets.only(right: 10, left: 4),
@@ -258,7 +258,7 @@ class _CartScreenState extends State<CartScreen> {
                   ),
                 ),
 
-                // Total + Checkout (boutique bar)
+                
                 Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 18, vertical: 14),

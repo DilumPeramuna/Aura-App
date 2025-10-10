@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  // LIGHT THEME
+
   static final lightTheme = ThemeData(
     brightness: Brightness.light,
     scaffoldBackgroundColor: Colors.grey[50],
@@ -32,7 +32,7 @@ class AppTheme {
     ),
   );
 
-  // DARK THEME
+  
   static final darkTheme = ThemeData(
     brightness: Brightness.dark,
     scaffoldBackgroundColor: const Color(0xFF121212),

@@ -92,7 +92,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             );
           }
 
-          // ---------- MOBILE/TABLET (original stacked layout) ----------
+        
           if (!isDesktop) {
             return Padding(
               padding: const EdgeInsets.all(16.0),
@@ -224,7 +224,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             );
           }
 
-          // ---------- DESKTOP (two-pane layout) ----------
+          
           return Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 1200),
@@ -233,7 +233,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // LEFT: Order Items
+                    
                     Expanded(
                       flex: 7,
                       child: Column(
@@ -303,7 +303,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
                     const SizedBox(width: 24),
 
-                    // RIGHT: Address + Total + Confirm
+                    
                     Expanded(
                       flex: 5,
                       child: Container(

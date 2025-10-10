@@ -75,17 +75,17 @@ class _HomescreenState extends State<Homescreen>
     final colorScheme = Theme.of(context).colorScheme;
     final width = MediaQuery.of(context).size.width;
 
-    // Desktop threshold
+    
     const desktopW = 1100.0;
 
-    // Responsive hero height
+    
     final double heroHeight =
         width >= desktopW ? 420 : (width >= 800 ? 320 : 250);
 
-    // Max readable content width for desktop/tablet
+    
     const double maxContentWidth = 1200;
 
-    // Scale titles subtly on desktop
+    
     final double titleSize = width >= desktopW ? 34 : (width >= 800 ? 30 : 28);
     final EdgeInsets contentHPadding =
         width >= desktopW ? const EdgeInsets.symmetric(horizontal: 40, vertical: 40)
@@ -101,16 +101,16 @@ class _HomescreenState extends State<Homescreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // ---------- HERO SECTION ----------
+               
                 if (width >= desktopW)
-                  // Desktop: split layout (left text+button, right slideshow)
+                  
                   Container(
                     height: heroHeight,
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: Row(
                       children: [
-                        // LEFT: Headline, subtitle, CTA
+                        
                         Expanded(
                           flex: 6,
                           child: Padding(
@@ -142,7 +142,7 @@ class _HomescreenState extends State<Homescreen>
                                 const SizedBox(height: 26),
                                 ElevatedButton(
                                   onPressed: () {
-                                    // ✅ Keep bottom bar by navigating to Wrapper’s Products tab
+                                    
                                     Navigator.pushReplacement(
                                       context,
                                       MaterialPageRoute(
@@ -176,7 +176,7 @@ class _HomescreenState extends State<Homescreen>
                           ),
                         ),
                         const SizedBox(width: 20),
-                        // RIGHT: Slideshow in a rounded card
+                     
                         Expanded(
                           flex: 7,
                           child: ClipRRect(
@@ -207,7 +207,7 @@ class _HomescreenState extends State<Homescreen>
                     ),
                   )
                 else
-                  // Mobile/Tablet: original stacked hero image only
+                  
                   SizedBox(
                     height: heroHeight,
                     width: double.infinity,
@@ -231,9 +231,7 @@ class _HomescreenState extends State<Homescreen>
                     ),
                   ),
 
-                // ---------- TITLE SECTION ----------
-                // Only show this below the hero on mobile/tablet,
-                // because on desktop the hero already contains the text+button.
+      
                 if (width < desktopW)
                   Padding(
                     padding: contentHPadding,
@@ -264,7 +262,7 @@ class _HomescreenState extends State<Homescreen>
                         const SizedBox(height: 35),
                         ElevatedButton(
                           onPressed: () {
-                            // ✅ Keep bottom bar by navigating to Wrapper’s Products tab
+                            
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
@@ -295,7 +293,7 @@ class _HomescreenState extends State<Homescreen>
                     ),
                   ),
 
-                // ---------- VISION & MISSION ----------
+                
                 sectionTitle("Our Vision", colorScheme, width),
                 sectionText(
                     "To become the world's most trusted online destination for authentic, handcrafted gemstone jewelry.",
@@ -307,7 +305,7 @@ class _HomescreenState extends State<Homescreen>
                     colorScheme,
                     width),
 
-                // ---------- PICK OF THE MONTH ----------
+               
                 sectionTitle("Pick of the Month", colorScheme, width),
                 Padding(
                   padding: EdgeInsets.symmetric(
@@ -347,14 +345,14 @@ class _HomescreenState extends State<Homescreen>
                   ),
                 ),
 
-                // ---------- PHILOSOPHY ----------
+                
                 sectionTitle("The Aura Philosophy", colorScheme, width),
                 sectionText(
                     "We believe true luxury lies in authenticity. That's why we partner with ethical suppliers in Sri Lanka to source only the finest natural gemstones.",
                     colorScheme,
                     width),
 
-                // ---------- TESTIMONIALS ----------
+              
                 sectionTitle("What Our Clients Say", colorScheme, width),
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: width >= desktopW ? 20 : 0),
@@ -386,7 +384,7 @@ class _HomescreenState extends State<Homescreen>
     );
   }
 
-  // ---------- REUSABLE SECTIONS ----------
+  
   Widget sectionTitle(String text, ColorScheme colorScheme, double width) {
     final size = width >= 1100 ? 26 : 22;
     return Padding(
@@ -418,7 +416,7 @@ class _HomescreenState extends State<Homescreen>
     );
   }
 
-  // ---------- PRODUCT CARD ----------
+
   Widget buildProductCard(
       BuildContext context,
       String image,
@@ -505,7 +503,7 @@ class _HomescreenState extends State<Homescreen>
     );
   }
 
-  // ---------- TESTIMONIAL CARD ----------
+
   Widget testimonialCard(String text, String author, ColorScheme colorScheme) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
