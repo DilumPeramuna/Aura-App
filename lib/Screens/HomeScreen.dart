@@ -2,7 +2,11 @@ import 'dart:async';
 import 'package:aura1/Screens/ProductDetailPage.dart';
 // import 'package:aura1/Screens/products_page.dart';
 import 'package:aura1/components/footer.dart';
+import 'package:aura1/models/product_model.dart';
+import 'package:aura1/providers/product_provider.dart';
+import 'package:aura1/services/network_service.dart'; // Import NetworkService
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:aura1/main.dart';
 
 class Homescreen extends StatefulWidget {
@@ -23,40 +27,17 @@ class _HomescreenState extends State<Homescreen>
     "assets/images/ring3.webp",
   ];
 
-  final List<Map<String, String>> featuredProducts = [
-    {
-      "image": "assets/images/b1.webp",
-      "name": "Aurora Diamond Bangle",
-      "price": "\$2,589",
-      "description":
-          "A beautifully crafted diamond bangle that radiates luxury and grace. Perfect for elegant occasions."
-    },
-    {
-      "image": "assets/images/n1.webp",
-      "name": "Aphrodite Diamond Necklace",
-      "price": "\$3,200",
-      "description":
-          "This timeless necklace sparkles with premium-cut diamonds, symbolizing love and eternity."
-    },
-    {
-      "image": "assets/images/r1.webp",
-      "name": "Marilyn Silver Ring",
-      "price": "\$2,449",
-      "description":
-          "A refined silver ring with a sleek modern design, ideal for daily wear or gifting."
-    },
-    {
-      "image": "assets/images/n2.webp",
-      "name": "Starry Night Necklace",
-      "price": "\$2,499",
-      "description":
-          "Deep blue sapphire surrounded by dazzling stones — a true statement of elegance."
-    },
-  ];
-
   @override
   void initState() {
     super.initState();
+    Future.microtask(() async {
+      // Check network connection before fetching
+      if (await NetworkService.checkConnection(context)) {
+        if (mounted) {
+           Provider.of<ProductProvider>(context, listen: false).fetchProducts();
+        }
+      }
+    });
     _timer = Timer.periodic(const Duration(seconds: 3), (timer) {
       setState(() {
         _currentImageIndex = (_currentImageIndex + 1) % _heroImages.length;
@@ -318,26 +299,51 @@ class _HomescreenState extends State<Homescreen>
                       final childAspectRatio =
                           w >= desktopW ? 0.82 : (w >= 800 ? 0.76 : 0.72);
 
-                      return GridView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: featuredProducts.length,
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: crossAxisCount,
-                          mainAxisSpacing: 14,
-                          crossAxisSpacing: 14,
-                          childAspectRatio: childAspectRatio,
-                        ),
-                        itemBuilder: (context, index) {
-                          final product = featuredProducts[index];
-                          return buildProductCard(
-                            context,
-                            product["image"]!,
-                            product["name"]!,
-                            product["price"]!,
-                            product["description"]!,
-                            colorScheme,
-                            w,
+                      return Consumer<ProductProvider>(
+                        builder: (context, provider, child) {
+                          if (provider.isLoading) {
+                            return const Center(
+                                child: CircularProgressIndicator());
+                          }
+
+                          if (provider.products.isEmpty) {
+                            return const Center(
+                                child: Text("No products available."));
+                          }
+
+                          // Filter products where isPick is true
+                          final pickedProducts =
+                              provider.products.where((p) => p.isPick).toList();
+
+                          // If no products are marked as pick, fallback to first 4 or empty
+                          final displayProducts = pickedProducts.isNotEmpty
+                              ? pickedProducts.take(4).toList()
+                              : provider.products.take(4).toList();
+
+                          return GridView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: displayProducts.length,
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: crossAxisCount,
+                              mainAxisSpacing: 14,
+                              crossAxisSpacing: 14,
+                              childAspectRatio: childAspectRatio,
+                            ),
+                            itemBuilder: (context, index) {
+                              final product = displayProducts[index];
+                              return buildProductCard(
+                                context,
+                                product.id, // Pass product.id
+                                product.image,
+                                product.name,
+                                "\$${product.price.toStringAsFixed(2)}",
+                                product.description,
+                                colorScheme,
+                                w,
+                              );
+                            },
                           );
                         },
                       );
@@ -419,6 +425,7 @@ class _HomescreenState extends State<Homescreen>
 
   Widget buildProductCard(
       BuildContext context,
+      int id, // Added id parameter
       String image,
       String name,
       String price,
@@ -444,11 +451,27 @@ class _HomescreenState extends State<Homescreen>
             borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
             child: AspectRatio(
               aspectRatio: 1.55,
-              child: Image.asset(
-                image,
-                fit: BoxFit.cover,
-                width: double.infinity,
-              ),
+              child: image.startsWith('http')
+                  ? Image.network(
+                      image,
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      errorBuilder: (context, error, stackTrace) => Container(
+                        color: Colors.grey[200],
+                        child:
+                            const Icon(Icons.broken_image, color: Colors.grey),
+                      ),
+                    )
+                  : Image.asset(
+                      image,
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      errorBuilder: (context, error, stackTrace) => Container(
+                        color: Colors.grey[200],
+                        child:
+                            const Icon(Icons.broken_image, color: Colors.grey),
+                      ),
+                    ),
             ),
           ),
           const SizedBox(height: 10),
@@ -482,7 +505,8 @@ class _HomescreenState extends State<Homescreen>
                 context,
                 MaterialPageRoute(
                   builder: (_) => ProductDetailPage(
-                    image: image,
+                    id: id, // Pass id here
+                    images: [image],
                     name: name,
                     price: price,
                     description: description,

@@ -1,89 +1,26 @@
 import 'package:aura1/Screens/ProductDetailPage.dart';
 import 'package:aura1/components/footer.dart';
+import 'package:aura1/models/product_model.dart';
+import 'package:aura1/providers/product_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-class ProductsPage extends StatelessWidget {
+class ProductsPage extends StatefulWidget {
   const ProductsPage({super.key});
 
-  final List<Map<String, String>> products = const [
-    {
-      "image": "assets/images/b2.webp",
-      "name": "Aurora Diamond Bangle",
-      "price": "\$2,589",
-      "description":
-          "A beautifully crafted diamond bangle that radiates luxury and grace. Perfect for elegant occasions."
-    },
-    {
-      "image": "assets/images/n3.webp",
-      "name": "Aphrodite Diamond Necklace",
-      "price": "\$3,200",
-      "description":
-          "This timeless necklace sparkles with premium-cut diamonds, symbolizing love and eternity."
-    },
-    {
-      "image": "assets/images/r2.webp",
-      "name": "Marilyn Silver Ring",
-      "price": "\$2,449",
-      "description":
-          "A refined silver ring with a sleek modern design, ideal for daily wear or gifting."
-    },
-    {
-      "image": "assets/images/n3.webp",
-      "name": "Starry Night Sapphire Necklace",
-      "price": "\$2,499",
-      "description":
-          "Deep blue sapphire surrounded by dazzling stones — a true statement of elegance."
-    },
-    {
-      "image": "assets/images/green ear.jpg",
-      "name": "Emerald Elegance Earrings",
-      "price": "\$1,899",
-      "description":
-          "Elegant emerald earrings with a radiant green hue that adds sophistication to any outfit."
-    },
-    {
-      "image": "assets/images/ring3.webp",
-      "name": "Celestial Ruby Ring",
-      "price": "\$2,799",
-      "description":
-          "A fiery ruby centerpiece ring that captures the brilliance of the cosmos in fine craftsmanship."
-    },
-    {
-      "image": "assets/images/bracelets.jpg",
-      "name": "Golden Aura Bracelet",
-      "price": "\$2,099",
-      "description":
-          "Delicately designed gold bracelet symbolizing warmth, strength, and timeless charm."
-    },
-    {
-      "image": "assets/images/b1.webp",
-      "name": "Moonlight Pearl Bracelet",
-      "price": "\$3,450",
-      "description":
-          "Elegant pearls that shimmer with every movement, inspired by the tranquility of moonlight."
-    },
-    {
-      "image": "assets/images/n2.webp",
-      "name": "Blue Topaz Gemstone Necklace",
-      "price": "\$2,799",
-      "description":
-          "Captivating topaz gemstone pendant that embodies serenity, purity, and radiant blue beauty."
-    },
-    {
-      "image": "assets/images/r1.webp",
-      "name": "Royal Onyx Men's Ring",
-      "price": "\$2,299",
-      "description":
-          "Bold and masculine, this onyx ring exudes power and sophistication in every detail."
-    },
-    {
-      "image": "assets/images/b2.webp",
-      "name": "Map of Love Bracelet",
-      "price": "\$1,499",
-      "description":
-          "A minimalist pendant engraved with a global map design — symbolizing unity and connection."
-    },
-  ];
+  @override
+  State<ProductsPage> createState() => _ProductsPageState();
+}
+
+class _ProductsPageState extends State<ProductsPage> {
+  @override
+  void initState() {
+    super.initState();
+    // Fetch products when page loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<ProductProvider>(context, listen: false).fetchProducts();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -110,36 +47,53 @@ class ProductsPage extends StatelessWidget {
             const SizedBox(height: 20),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  
-                  final double w = constraints.maxWidth;
-                  final int crossAxisCount =
-                      w >= 1100 ? 4 : (w >= 700 ? 3 : 2);
+              child: Consumer<ProductProvider>(
+                builder: (context, productProvider, child) {
+                  if (productProvider.isLoading) {
+                    return const SizedBox(
+                      height: 300,
+                      child: Center(child: CircularProgressIndicator()),
+                    );
+                  }
 
-                  
-                  final double childAspectRatio =
-                      w >= 1100 ? 0.88 : (w >= 700 ? 0.78 : 0.62);
+                  if (productProvider.products.isEmpty) {
+                     return const SizedBox(
+                      height: 300,
+                      child: Center(child: Text("No products found.")),
+                    );
+                  }
 
-                  return GridView.builder(
-                    physics: const NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: crossAxisCount,
-                      mainAxisSpacing: 18,
-                      crossAxisSpacing: 18,
-                      childAspectRatio: childAspectRatio,
-                    ),
-                    itemCount: products.length,
-                    itemBuilder: (context, index) {
-                      final product = products[index];
-                      return _buildProductCard(
-                        context,
-                        product["image"]!,
-                        product["name"]!,
-                        product["price"]!,
-                        product["description"]!,
-                        colorScheme,
+                  final products = productProvider.products;
+
+                  return LayoutBuilder(
+                    builder: (context, constraints) {
+                      
+                      final double w = constraints.maxWidth;
+                      final int crossAxisCount =
+                          w >= 1100 ? 4 : (w >= 700 ? 3 : 2);
+
+                      
+                      final double childAspectRatio =
+                          w >= 1100 ? 0.88 : (w >= 700 ? 0.78 : 0.62);
+
+                      return GridView.builder(
+                        physics: const NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: crossAxisCount,
+                          mainAxisSpacing: 18,
+                          crossAxisSpacing: 18,
+                          childAspectRatio: childAspectRatio,
+                        ),
+                        itemCount: products.length,
+                        itemBuilder: (context, index) {
+                          final product = products[index];
+                          return _buildProductCard(
+                            context,
+                            product,
+                            colorScheme,
+                          );
+                        },
                       );
                     },
                   );
@@ -156,10 +110,7 @@ class ProductsPage extends StatelessWidget {
 
   Widget _buildProductCard(
     BuildContext context,
-    String image,
-    String name,
-    String price,
-    String description,
+    Product product,
     ColorScheme colorScheme,
   ) {
     return Card(
@@ -174,7 +125,12 @@ class ProductsPage extends StatelessWidget {
           
           AspectRatio(
             aspectRatio: 1.5, 
-            child: Image.asset(image, fit: BoxFit.cover),
+            child: Image.network(
+              product.image, 
+              fit: BoxFit.cover,
+              errorBuilder: (ctx, error, stackTrace) => 
+                  Container(color: Colors.grey[200], child: const Icon(Icons.broken_image)),
+            ),
           ),
 
           
@@ -186,7 +142,7 @@ class ProductsPage extends StatelessWidget {
                 children: [
                   
                   Text(
-                    name,
+                    product.name,
                     textAlign: TextAlign.center,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -202,7 +158,7 @@ class ProductsPage extends StatelessWidget {
 
                   // Price
                   Text(
-                    price,
+                    "\$${product.price.toStringAsFixed(2)}",
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -217,14 +173,20 @@ class ProductsPage extends StatelessWidget {
                     height: 38,
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.push(
+Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (_) => ProductDetailPage(
-                              image: image,
-                              name: name,
-                              price: price,
-                              description: description,
+                              id: product.id,
+                              images: [
+                                product.image,
+                                product.image1,
+                                product.image2,
+                                product.image3,
+                              ].where((i) => i != null).whereType<String>().toList(), 
+                              name: product.name,
+                              price: "\$${product.price.toStringAsFixed(2)}",
+                              description: product.description,
                             ),
                           ),
                         );

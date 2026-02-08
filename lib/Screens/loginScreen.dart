@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:aura1/main.dart';
+import 'package:provider/provider.dart';
+import 'package:aura1/providers/auth_provider.dart';
 import 'package:aura1/components/footer.dart';
 import 'package:aura1/Screens/signupScreen.dart';
 
@@ -11,7 +13,16 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
   bool _obscurePassword = true;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -118,6 +129,7 @@ class _LoginScreenState extends State<LoginScreen> {
           Text("Email", style: TextStyle(fontWeight: FontWeight.w500, color: colorScheme.onSurface)),
           const SizedBox(height: 6),
           TextField(
+            controller: _emailController,
             keyboardType: TextInputType.emailAddress,
             style: TextStyle(color: colorScheme.onSurface),
             decoration: InputDecoration(
@@ -144,6 +156,7 @@ class _LoginScreenState extends State<LoginScreen> {
           Text("Password", style: TextStyle(fontWeight: FontWeight.w500, color: colorScheme.onSurface)),
           const SizedBox(height: 6),
           TextField(
+            controller: _passwordController,
             obscureText: _obscurePassword,
             style: TextStyle(color: colorScheme.onSurface),
             decoration: InputDecoration(
@@ -181,26 +194,48 @@ class _LoginScreenState extends State<LoginScreen> {
           SizedBox(
             width: double.infinity,
             height: 45,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: colorScheme.primary,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(25),
-                ),
-                elevation: 6,
-                shadowColor: colorScheme.primary.withOpacity(0.4),
-              ),
-              onPressed: () {
-               
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => const Wrapper()),
+            child: Consumer<AuthProvider>(
+              builder: (context, auth, _) {
+                return ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: colorScheme.primary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                    elevation: 6,
+                    shadowColor: colorScheme.primary.withOpacity(0.4),
+                  ),
+                  onPressed: auth.isLoading
+                      ? null
+                      : () async {
+                          final success = await auth.login(
+                            _emailController.text,
+                            _passwordController.text,
+                          );
+
+                          if (success && context.mounted) {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(builder: (context) => const Wrapper()),
+                            );
+                          } else if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text("Login failed. Check credentials.")),
+                            );
+                          }
+                        },
+                  child: auth.isLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                        )
+                      : const Text(
+                          "Sign In",
+                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                        ),
                 );
               },
-              child: const Text(
-                "Sign In",
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
-              ),
             ),
           ),
           const SizedBox(height: 18),

@@ -8,8 +8,20 @@ import 'package:aura1/Screens/signupScreen.dart';
 import 'package:aura1/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
+import 'package:aura1/providers/auth_provider.dart';
+import 'package:aura1/providers/product_provider.dart';
+import 'package:provider/provider.dart';
+
 void main() {
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => ProductProvider()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -63,29 +75,62 @@ class _WrapperState extends State<Wrapper> {
         title: const Text("AURA"),
         centerTitle: true,
         actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => const LoginScreen()),
-              );
+Consumer<AuthProvider>(
+            builder: (context, auth, child) {
+              if (auth.isAuthenticated) {
+                return Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      "Hi, ${auth.user?.name ?? 'User'}",
+                      style: TextStyle(
+                        color: colorScheme.onSurface,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        auth.logout();
+                      },
+                      icon: Icon(Icons.logout, color: colorScheme.onSurface),
+                      tooltip: "Logout",
+                    ),
+                  ],
+                );
+              } else {
+                return Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const LoginScreen()),
+                        );
+                      },
+                      child: Text(
+                        "Login",
+                        style: TextStyle(color: colorScheme.onSurface),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const SignUpScreen()),
+                        );
+                      },
+                      child: Text(
+                        "Sign Up",
+                        style: TextStyle(color: colorScheme.onSurface),
+                      ),
+                    ),
+                  ],
+                );
+              }
             },
-            child: Text(
-              "Login",
-              style: TextStyle(color: colorScheme.onSurface),
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => const SignUpScreen()),
-              );
-            },
-            child: Text(
-              "Sign Up",
-              style: TextStyle(color: colorScheme.onSurface),
-            ),
           ),
           IconButton(
             onPressed: () {

@@ -1,6 +1,12 @@
 import 'package:aura1/components/cart_data.dart';
 import 'package:aura1/main.dart';
+import 'package:aura1/providers/auth_provider.dart';
+import 'package:aura1/services/api_service.dart';
+import 'package:aura1/services/battery_service.dart'; // Import BatteryService
+import 'package:aura1/services/location_service.dart'; // Import LocationService
+import 'package:aura1/services/network_service.dart'; // Import NetworkService
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({super.key});
@@ -11,6 +17,64 @@ class CheckoutScreen extends StatefulWidget {
 
 class _CheckoutScreenState extends State<CheckoutScreen> {
   final TextEditingController addressController = TextEditingController();
+  bool _isLoadingLocation = false;
+  int _batteryLevel = -1; // Initialize battery level
+
+  @override
+  void initState() {
+    super.initState();
+    _checkBattery(); // Check battery on init
+  }
+
+  Future<void> _checkBattery() async {
+    final batteryService = BatteryService();
+    // Get level for display
+    final level = await batteryService.getBatteryLevel();
+    if (mounted) {
+      setState(() {
+        _batteryLevel = level;
+      });
+      // Check for low battery warning
+      await batteryService.checkBatteryAndWarn(context);
+    }
+  }
+
+  Future<void> _getCurrentLocation() async {
+    // Check network connection first
+    bool isConnected = await NetworkService.checkConnection(context);
+    if (!isConnected) return;
+
+    setState(() {
+      _isLoadingLocation = true;
+    });
+
+    try {
+      final position = await LocationService().getCurrentLocation();
+      if (position != null) {
+        final address = await LocationService().getAddressFromCoordinates(position);
+        if (address != null) {
+          setState(() {
+            addressController.text = address;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Address updated from location!")),
+          );
+        } else {
+           ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Could not determine address from location.")),
+          );
+        }
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
+    } finally {
+      setState(() {
+        _isLoadingLocation = false;
+      });
+    }
+  }
 
   double getTotal() {
     double total = 0;
@@ -21,35 +85,166 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     return total;
   }
 
-  void confirmOrder(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    if (addressController.text.trim().isEmpty) {
+  Widget _buildImage(String path) {
+    if (path.startsWith('http')) {
+      return Image.network(
+        path,
+        width: 56,
+        height: 56,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => Container(
+          width: 56,
+          height: 56,
+          color: Colors.grey[200],
+          child: const Icon(Icons.broken_image, color: Colors.grey, size: 20),
+        ),
+      );
+    } else {
+      return Image.asset(
+        path,
+        width: 56,
+        height: 56,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => Container(
+          width: 56,
+          height: 56,
+          color: Colors.grey[200],
+          child: const Icon(Icons.broken_image, color: Colors.grey, size: 20),
+        ),
+      );
+    }
+  }
+
+  Future<void> confirmOrder(BuildContext context) async {
+    // Check network connection first
+    bool isConnected = await NetworkService.checkConnection(context);
+    if (!isConnected) return;
+
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    if (!authProvider.isAuthenticated) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text("Please enter your delivery address."),
+        const SnackBar(
+          content: Text("You must be logged in to place an order."),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      // Optional: Navigate to login if you have a direct route, 
+      // or rely on user using the header/menu to login.
+      // Given the current structure, let's guide them.
+      // Since Wrapper controls the main view, we might need to pop to it?
+      // But Checkout is likely pushed on top.
+      return;
+    }
+
+    final colorScheme = Theme.of(context).colorScheme;
+    final address = addressController.text.trim();
+
+    if (address.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please enter your delivery address."),
           backgroundColor: Colors.redAccent,
         ),
       );
       return;
     }
 
-    cartItems.clear();
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text("✅ Order Confirmed! Thank you for your purchase."),
-        backgroundColor: colorScheme.primary,
-        duration: const Duration(seconds: 2),
-      ),
+    // Show loading indicator
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
     );
 
-    Future.delayed(const Duration(milliseconds: 800), () {
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (_) => const Wrapper()),
-        (route) => false,
+    final user = Provider.of<AuthProvider>(context, listen: false).user;
+    final nameParts = (user?.name ?? 'Guest User').trim().split(' ');
+    final firstName = nameParts.isNotEmpty ? nameParts.first : 'Guest';
+    // Laravel 'required' fails on empty string. Ensure last name is not empty.
+    final lastName = (nameParts.length > 1 && nameParts.last.isNotEmpty) 
+        ? nameParts.sublist(1).join(' ') 
+        : '-'; 
+
+    final total = getTotal();
+    final items = cartItems.map((item) {
+      final priceString = item['price']!.replaceAll(RegExp(r'[^\d.]'), '');
+      final price = double.tryParse(priceString) ?? 0.0;
+      
+      return {
+        'id': item['id'],
+        'name': item['name'],
+        'quantity': item['quantity'],
+        'price': price,
+        'image': item['image'],
+      };
+    }).toList();
+
+    final orderData = {
+      'total_amount': total,
+      'payment_method': 'COD',
+      'first_name': firstName,
+      'last_name': lastName,
+      'email': user?.email ?? 'no-email@example.com',
+      'street': address,
+      'city': 'N/A', // Placeholder as UI input is single field
+      'postal_code': '00000',
+      'country': 'Sri Lanka',
+      'items': items,
+    };
+
+    print("Sending Order Data: $orderData"); // Debug log
+
+    final apiService = ApiService();
+    final result = await apiService.createOrder(orderData);
+
+    // Remove loading indicator
+    Navigator.of(context).pop();
+
+    print("Order Result: $result"); // Debug log
+
+    if (result['success']) {
+      cartItems.clear();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text("✅ Order Confirmed! Thank you for your purchase."),
+          backgroundColor: colorScheme.primary,
+          duration: const Duration(seconds: 2),
+        ),
       );
-    });
+
+      Future.delayed(const Duration(milliseconds: 800), () {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (_) => const Wrapper()),
+          (route) => false,
+        );
+      });
+    } else {
+      String errorMessage = result['message'] ?? "Failed to place order.";
+      if (result['errors'] != null) {
+        final errors = result['errors'] as Map<String, dynamic>;
+        errorMessage += "\n\n";
+        errors.forEach((key, value) {
+          errorMessage += "$key: ${(value as List).join(', ')}\n";
+        });
+      }
+
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text("Order Failed"),
+          content: SingleChildScrollView(
+            child: Text(errorMessage),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text("OK"),
+            ),
+          ],
+        ),
+      );
+    }
   }
 
   @override
@@ -74,6 +269,31 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           icon: Icon(Icons.arrow_back_ios_new, color: colorScheme.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
+        actions: [
+          if (_batteryLevel != -1)
+            Padding(
+              padding: const EdgeInsets.only(right: 16.0),
+              child: Row(
+                children: [
+                  Icon(
+                    _batteryLevel > 20 ? Icons.battery_full : Icons.battery_alert,
+                    color: _batteryLevel > 20 ? Colors.green : Colors.red,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    "$_batteryLevel%",
+                    style: TextStyle(
+                      color: colorScheme.onSurface, 
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
@@ -124,12 +344,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           child: ListTile(
                             leading: ClipRRect(
                               borderRadius: BorderRadius.circular(10),
-                              child: Image.asset(
-                                item['image']!,
-                                width: 50,
-                                height: 50,
-                                fit: BoxFit.cover,
-                              ),
+                              child: _buildImage(item['image']!),
                             ),
                             title: Text(
                               item['name']!,
@@ -149,6 +364,29 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   ),
 
                   const SizedBox(height: 10),
+
+                  const SizedBox(height: 10),
+
+                  // Location Button for Mobile
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: _isLoadingLocation ? null : _getCurrentLocation,
+                      icon: _isLoadingLocation 
+                        ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                        : const Icon(Icons.my_location, color: Colors.white),
+                      label: Text(
+                        _isLoadingLocation ? "Detecting..." : "Use Current Location",
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: colorScheme.primary, // Use primary color
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
 
                   Text(
                     "Delivery Address",
@@ -270,12 +508,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                       vertical: 6, horizontal: 6),
                                   leading: ClipRRect(
                                     borderRadius: BorderRadius.circular(10),
-                                    child: Image.asset(
-                                      item['image']!,
-                                      width: 56,
-                                      height: 56,
-                                      fit: BoxFit.cover,
-                                    ),
+                                    child: _buildImage(item['image']!),
                                   ),
                                   title: Text(
                                     item['name']!,
@@ -325,6 +558,27 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            // Location Button for Desktop
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton.icon(
+                                onPressed: _isLoadingLocation ? null : _getCurrentLocation,
+                                icon: _isLoadingLocation 
+                                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                                  : const Icon(Icons.my_location, color: Colors.white),
+                                label: Text(
+                                  _isLoadingLocation ? "Detecting..." : "Use Current Location",
+                                  style: const TextStyle(color: Colors.white),
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: colorScheme.primary, 
+                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+
                             Text(
                               "Delivery Address",
                               style: TextStyle(

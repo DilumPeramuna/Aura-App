@@ -142,12 +142,37 @@ class _CartScreenState extends State<CartScreen> {
                                 topLeft: Radius.circular(16),
                                 bottomLeft: Radius.circular(16),
                               ),
-                              child: Image.asset(
-                                item['image']!,
-                                width: 96,
-                                height: 96,
-                                fit: BoxFit.cover,
-                              ),
+                              child: item['image']!.startsWith('http')
+                                  ? Image.network(
+                                      item['image']!,
+                                      width: 96,
+                                      height: 96,
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) =>
+                                              Container(
+                                        width: 96,
+                                        height: 96,
+                                        color: Colors.grey[200],
+                                        child: const Icon(Icons.broken_image,
+                                            color: Colors.grey),
+                                      ),
+                                    )
+                                  : Image.asset(
+                                      item['image']!,
+                                      width: 96,
+                                      height: 96,
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) =>
+                                              Container(
+                                        width: 96,
+                                        height: 96,
+                                        color: Colors.grey[200],
+                                        child: const Icon(Icons.broken_image,
+                                            color: Colors.grey),
+                                      ),
+                                    ),
                             ),
 
                             

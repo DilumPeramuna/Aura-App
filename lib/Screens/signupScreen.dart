@@ -1,7 +1,9 @@
 import 'package:aura1/Screens/loginScreen.dart';
 import 'package:aura1/main.dart';
 import 'package:aura1/components/footer.dart';
+import 'package:aura1/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -20,9 +22,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool showPassword = false;
   bool showConfirmPassword = false;
 
-  void _signUp() {
+  Future<void> _signUp() async {
+    final name = fullNameController.text.trim();
+    final email = emailController.text.trim();
     final password = passwordController.text;
     final confirm = confirmPasswordController.text;
+
+    if (name.isEmpty || email.isEmpty || password.isEmpty || confirm.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please fill in all fields!"),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return;
+    }
 
     if (password != confirm) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -34,19 +48,33 @@ class _SignUpScreenState extends State<SignUpScreen> {
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(" Account Created Successfully!"),
-        backgroundColor: Colors.green,
-      ),
-    );
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final error = await authProvider.register(name, email, password, confirm);
 
-    Future.delayed(const Duration(milliseconds: 800), () {
+    if (error == null) {
+      // Success
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Account Created! Redirecting..."),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      // Wrapper handles showing logged in state
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const Wrapper()),
       );
-    });
+    } else {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(error),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    }
   }
 
   @override
@@ -180,21 +208,34 @@ class _SignUpScreenState extends State<SignUpScreen> {
           SizedBox(
             width: double.infinity,
             height: 50,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: colorScheme.primary,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(25),
-                ),
-              ),
-              onPressed: _signUp,
-              child: const Text(
-                "Create Account",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+            child: Consumer<AuthProvider>(
+              builder: (context, auth, child) {
+                return ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: colorScheme.primary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                  ),
+                  onPressed: auth.isLoading ? null : _signUp,
+                  child: auth.isLoading
+                      ? const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : const Text(
+                          "Create Account",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                );
+              },
             ),
           ),
           const SizedBox(height: 18),
